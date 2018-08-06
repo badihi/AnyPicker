@@ -125,8 +125,9 @@ $.AnyPicker = $.AnyPicker || {
 		inputChangeEvent: "onSet",
 
 		lang: "",
-		rtl: false,
+		rtl: true,
 		animationDuration: 500,
+		calendar: typeof JalaliDate !== "undefined" ? JalaliDate : Date,
 
 		// View Section Components Start
 
@@ -364,7 +365,7 @@ $.AnyPicker = $.AnyPicker || {
 		{
 			return this.each(function()
 			{
-				var iTimeStamp = (new Date()).getTime();
+				var iTimeStamp = (new Date().getTime());
 				if(!$.data(this, "plugin_AnyPicker_" + iTimeStamp)) 
 				{
 					options.timestamp = iTimeStamp;
@@ -524,6 +525,9 @@ AnyPicker.prototype = {
 	init: function()
 	{
 		var apo = this;
+
+		apo.setting.i18n.shortMonths = apo.setting.i18n.calendarShortMonths[apo.setting.calendar.name];
+		apo.setting.i18n.fullMonths = apo.setting.i18n.calendarFullMonths[apo.setting.calendar.name];
 	
 		if($.CF.isValid(apo.elem))
 		{
@@ -2878,8 +2882,14 @@ $.AnyPicker = $.extend(true, $.AnyPicker, {
 			veryShortDays: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
 			shortDays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
 			fullDays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-			shortMonths: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-			fullMonths: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+			calendarShortMonths: {
+				"Date": "Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec".split("_"),
+				"JalaliDate": "Far_Ord_Kho_Tir_Mor_Sha_Meh_Abn_Azr_Dey_Bah_Esf".split("_")
+			},
+			calendarFullMonths: {
+				"Date": "January_February_March_April_May_June_July_August_September_October_November_December".split("_"),
+				"JalaliDate": "Farvardin_Ordibehesht_Khordad_Tir_Mordad_Shahrivar_Mehr_Aban_Azar_Dey_Bahman_Esfand".split("_")
+			},
 			numbers: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
 			meridiem: 
 			{
@@ -2958,8 +2968,14 @@ $.AnyPicker = $.extend(true, $.AnyPicker, {
 			veryShortDays: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
 			shortDays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
 			fullDays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-			shortMonths: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-			fullMonths: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+			calendarShortMonths: {
+				"Date": "Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec".split("_"),
+				"JalaliDate": "Far_Ord_Kho_Tir_Mor_Sha_Meh_Abn_Azr_Dey_Bah_Esf".split("_")
+			},
+			calendarFullMonths: {
+				"Date": "January_February_March_April_May_June_July_August_September_October_November_December".split("_"),
+				"JalaliDate": "Farvardin_Ordibehesht_Khordad_Tir_Mordad_Shahrivar_Mehr_Aban_Azar_Dey_Bahman_Esfand".split("_")
+			},
 			numbers: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
 			meridiem: 
 			{
@@ -3122,7 +3138,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 			else if(Object.prototype.toString.call(oDate) === "[object Date]")
 			{
 				apo.setting.selectedDate = apo.formatOutputDates(oDate);
-				apo.tmp.selectedDate = new Date(oDate);
+				apo.tmp.selectedDate = this._getDate(oDate);
 			}
 
 			if(apo.setting.inputElement !== null)
@@ -3140,7 +3156,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 		}
 		else
 		{
-			apo.tmp.selectedDate = new Date($.AnyPicker.extra.dToday);
+			apo.tmp.selectedDate = this._getDate($.AnyPicker.extra.dToday);
 		}
 	},
 
@@ -3816,7 +3832,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 		}
 		else if(Object.prototype.toString.call(sDate) === "[object Date]")
 		{
-			oThisDate = new Date(sDate);
+			oThisDate = this._getDate(sDate);
 		}
 	
 		return oThisDate;
@@ -4033,6 +4049,13 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 	},
 
 	// Public Method
+	setCalendar: function(calendar)
+	{
+		var apo = this;
+		apo.setting.calendar = calendar;
+	},
+
+	// Public Method
 	parseDisableValues: function()
 	{
 		var apo = this;
@@ -4085,8 +4108,8 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 
 			if(bIsOutOfBounds)
 			{
-				apo.setting.selectedDate = new Date(apo.tmp.oMinMax.min);
-				apo.tmp.selectedDate = new Date(apo.tmp.oMinMax.min);
+				apo.setting.selectedDate = this._getDate(apo.tmp.oMinMax.min);
+				apo.tmp.selectedDate = this._getDate(apo.tmp.oMinMax.min);
 			}
 		}
 		else if($.CF.isValid(apo.tmp.oMinMax.min))
@@ -4109,8 +4132,8 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 
 			if(bIsOutOfBounds)
 			{
-				apo.setting.selectedDate = new Date(apo.tmp.oMinMax.min);
-				apo.tmp.selectedDate = new Date(apo.tmp.oMinMax.min);
+				apo.setting.selectedDate = this._getDate(apo.tmp.oMinMax.min);
+				apo.tmp.selectedDate = this._getDate(apo.tmp.oMinMax.min);
 			}
 		}
 		else if($.CF.isValid(apo.tmp.oMinMax.max))
@@ -4133,8 +4156,8 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 
 			if(bIsOutOfBounds)
 			{
-				apo.setting.selectedDate = new Date(apo.tmp.oMinMax.max);
-				apo.tmp.selectedDate = new Date(apo.tmp.oMinMax.max);
+				apo.setting.selectedDate = this._getDate(apo.tmp.oMinMax.max);
+				apo.tmp.selectedDate = this._getDate(apo.tmp.oMinMax.max);
 			}
 		}
 
@@ -4479,6 +4502,8 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 						oDateToValidate.H = (oDateToValidate.sm === 1) ? ((oDateToValidate.h === 12) ? 12 : (oDateToValidate.h + 12)) : ((oDateToValidate.h === 12) ? 0 : oDateToValidate.h);
 					}
 
+					oDateToValidate.t = apo.setting.calendar;
+
 					var dNewSelectedDate = apo.setDateInFormat({"iDate": oDateToValidate}, "");
 					var bValidDate = apo.__validateSelectedDate(dNewSelectedDate, true, false);
 					if(!bValidDate)
@@ -4598,7 +4623,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 						{
 							bInvalidSelected = true;
 							dNewSelectedDate = apo._findValidSelectedDate(bIsBefore, dNewSelectedDate, "day");
-							apo.tmp.selectedDate = new Date(dNewSelectedDate);
+							apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 							apo.__scrollToSelectedRow();
 						}
 						else
@@ -4634,7 +4659,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(bIsBefore, dNewSelectedDate, "date");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -4656,7 +4681,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(bIsBefore, oDateRecord.start, "date");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -4677,7 +4702,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(true, oDateRecord.start, "date");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -4698,7 +4723,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(false, oDateRecord.end, "date");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -4722,7 +4747,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(bDirIsBefore, oDateRecord.min, "date");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -4743,7 +4768,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(false, oDateRecord.min, "date");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -4764,7 +4789,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(true, oDateRecord.max, "date");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -4821,7 +4846,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 									{
 										bInvalidSelected = true;
 										dNewSelectedDate = apo._findValidSelectedDate(bIsBefore, dNewSelectedDate, "time");
-										apo.tmp.selectedDate = new Date(dNewSelectedDate);
+										apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 										apo.__scrollToSelectedRow();
 									}
 									else
@@ -4842,7 +4867,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 									{
 										bInvalidSelected = true;
 										dNewSelectedDate = apo._findValidSelectedDate(bIsBefore, oTimeRecord.start, "time");
-										apo.tmp.selectedDate = new Date(dNewSelectedDate);
+										apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 										apo.__scrollToSelectedRow();
 									}
 									else
@@ -4863,7 +4888,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 									{
 										bInvalidSelected = true;
 										dNewSelectedDate = apo._findValidSelectedDate(true, oTimeRecord.start, "time");
-										apo.tmp.selectedDate = new Date(dNewSelectedDate);
+										apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 										apo.__scrollToSelectedRow();
 									}
 									else
@@ -4884,7 +4909,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 									{
 										bInvalidSelected = true;
 										dNewSelectedDate = apo._findValidSelectedDate(false, oTimeRecord.end, "time");
-										apo.tmp.selectedDate = new Date(dNewSelectedDate);
+										apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 										apo.__scrollToSelectedRow();
 									}
 									else
@@ -4909,7 +4934,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 									{
 										bInvalidSelected = true;
 										dNewSelectedDate = apo._findValidSelectedDate(bDirIsBefore, oTimeRecord.min, "time");
-										apo.tmp.selectedDate = new Date(dNewSelectedDate);
+										apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 										apo.__scrollToSelectedRow();
 									}
 									else
@@ -4930,7 +4955,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 									{
 										bInvalidSelected = true;
 										dNewSelectedDate = apo._findValidSelectedDate(false, oTimeRecord.min, "time");
-										apo.tmp.selectedDate = new Date(dNewSelectedDate);
+										apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 										apo.__scrollToSelectedRow();
 									}
 									else
@@ -4951,7 +4976,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 									{
 										bInvalidSelected = true;
 										dNewSelectedDate = apo._findValidSelectedDate(true, oTimeRecord.max, "time");
-										apo.tmp.selectedDate = new Date(dNewSelectedDate);
+										apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 										apo.__scrollToSelectedRow();
 									}
 									else
@@ -4991,7 +5016,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(bIsBefore, dNewSelectedDate, "datetime");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -5012,7 +5037,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(bIsBefore, oDateRecord.start, "datetime");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -5033,7 +5058,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(true, oDateRecord.start, "datetime");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -5054,7 +5079,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(false, oDateRecord.end, "datetime");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -5078,7 +5103,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(bDirIsBefore, oDateRecord.min, "datetime");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -5099,7 +5124,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(false, oDateRecord.min, "datetime");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -5120,7 +5145,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 							{
 								bInvalidSelected = true;
 								dNewSelectedDate = apo._findValidSelectedDate(true, oDateRecord.max, "datetime");
-								apo.tmp.selectedDate = new Date(dNewSelectedDate);
+								apo.tmp.selectedDate = this._getDate(dNewSelectedDate);
 								apo.__scrollToSelectedRow();
 							}
 							else
@@ -5160,22 +5185,22 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 		{
 			if($.CF.isValid(apo.setting.minValue) && apo.compareDates(apo.setting.minValue, dDate) >= 0)
 			{
-				dDate = new Date(apo.setting.minValue);
+				dDate = this._getDate(apo.setting.minValue);
 				bIsBefore = false;
 			}
 
 			if($.CF.isValid(apo.setting.maxValue) && apo.compareDates(apo.setting.maxValue, dDate) <= 0)
 			{
-				dDate = new Date(apo.setting.maxValue);
+				dDate = this._getDate(apo.setting.maxValue);
 				bIsBefore = true;
 			}
 
 			do
 			{
 				if(bIsBefore)
-					dDate = new Date(dDate.getTime() - $.AnyPicker.extra.iMS.d);
+					dDate = this._getDate(new Date(dDate.getTime() - $.AnyPicker.extra.iMS.d));
 				else
-					dDate = new Date(dDate.getTime() + $.AnyPicker.extra.iMS.d);
+					dDate = this._getDate(new Date(dDate.getTime() + $.AnyPicker.extra.iMS.d));
 				if(apo.__validateSelectedDate(dDate, true, false))
 				{
 					if((!$.CF.isValid(apo.setting.minValue) || ($.CF.isValid(apo.setting.minValue) && apo.compareDates(apo.setting.minValue, dDate) <= 0)) && (!$.CF.isValid(apo.setting.maxValue) || ($.CF.isValid(apo.setting.maxValue) && apo.compareDates(apo.setting.maxValue, dDate) >= 0)))
@@ -5190,22 +5215,22 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 		{
 			if($.CF.isValid(apo.setting.minValue) && apo.compareTimes(apo.setting.minValue, dDate) >= 0)
 			{
-				dDate = new Date(apo.setting.minValue);
+				dDate = this._getDate(apo.setting.minValue);
 				bIsBefore = false;
 			}
 
 			if($.CF.isValid(apo.setting.maxValue) && apo.compareTimes(apo.setting.maxValue, dDate) <= 0)
 			{
-				dDate = new Date(apo.setting.maxValue);
+				dDate = this._getDate(apo.setting.maxValue);
 				bIsBefore = true;
 			}
 
 			do
 			{
 				if(bIsBefore)
-					dDate = new Date(dDate.getTime() - ($.AnyPicker.extra.iMS.m * apo.setting.intervals.m));
+					dDate = this._getDate(new Date(dDate.getTime() - ($.AnyPicker.extra.iMS.m * apo.setting.intervals.m)));
 				else
-					dDate = new Date(dDate.getTime() + ($.AnyPicker.extra.iMS.m * apo.setting.intervals.m));
+					dDate = this._getDate(new Date(dDate.getTime() + ($.AnyPicker.extra.iMS.m * apo.setting.intervals.m)));
 				if(apo.__validateSelectedDate(dDate, true, false))
 				{
 					if((!$.CF.isValid(apo.setting.minValue) || ($.CF.isValid(apo.setting.minValue) && apo.compareTimes(apo.setting.minValue, dDate) <= 0)) && (!$.CF.isValid(apo.setting.maxValue) || ($.CF.isValid(apo.setting.maxValue) && apo.compareTimes(apo.setting.maxValue, dDate) >= 0)))
@@ -5219,22 +5244,22 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 		{
 			if($.CF.isValid(apo.setting.minValue) && apo.compareDateTimes(apo.setting.minValue, dDate) >= 0)
 			{
-				dDate = new Date(apo.setting.minValue);
+				dDate = this._getDate(apo.setting.minValue);
 				bIsBefore = false;
 			}
 
 			if($.CF.isValid(apo.setting.maxValue) && apo.compareDateTimes(apo.setting.maxValue, dDate) <= 0)
 			{
-				dDate = new Date(apo.setting.maxValue);
+				dDate = this._getDate(apo.setting.maxValue);
 				bIsBefore = true;
 			}
 
 			do
 			{
 				if(bIsBefore)
-					dDate = new Date(dDate.getTime() - ($.AnyPicker.extra.iMS.m * apo.setting.intervals.m));
+					dDate = this._getDate(new Date(dDate.getTime() - ($.AnyPicker.extra.iMS.m * apo.setting.intervals.m)));
 				else
-					dDate = new Date(dDate.getTime() + ($.AnyPicker.extra.iMS.m * apo.setting.intervals.m));
+					dDate = this._getDate(new Date(dDate.getTime() + ($.AnyPicker.extra.iMS.m * apo.setting.intervals.m)));
 				
 				if(apo.__validateSelectedDate(dDate, true, false))
 				{
@@ -5283,7 +5308,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 			
 			if(bHasAria)
 			{
-				var dTemp = new Date(oSelectedDate.y, oSelectedDate.M, iNoOfDays, oSelectedDate.H, oSelectedDate.m, oSelectedDate.s, oSelectedDate.ms);
+				var dTemp = this._getDate(new oSelectedDate.t(oSelectedDate.y, oSelectedDate.M, iNoOfDays, oSelectedDate.H, oSelectedDate.m, oSelectedDate.s, oSelectedDate.ms));
 				
 				apo.__validateSelectedDate(dTemp, false, true);
 				apo.__scrollToSelectedRow();
@@ -5309,7 +5334,8 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 				H: oInput.date.getHours(),
 				m: oInput.date.getMinutes(),
 				s: oInput.date.getSeconds(),
-				ms: oInput.date.getMilliseconds()
+				ms: oInput.date.getMilliseconds(),
+				t: oInput.date.constructor
 			};
 		}
 		else
@@ -5321,17 +5347,18 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 				H: (oInput.iDate.H !== undefined) ? oInput.iDate.H : 0,
 				m: (oInput.iDate.m !== undefined) ? oInput.iDate.m : 0,
 				s: (oInput.iDate.s !== undefined) ? oInput.iDate.s : 0,
-				ms: (oInput.iDate.ms !== undefined) ? oInput.iDate.ms : 0
+				ms: (oInput.iDate.ms !== undefined) ? oInput.iDate.ms : 0,
+				t: (oInput.iDate.t !== undefined) ? oInput.iDate.t : "Date",
 			};
 		}
 
 		var dDate;
 		if(!$.CF.isValid(sType))
-			dDate = new Date(oInput.iDate.y, oInput.iDate.M, oInput.iDate.d, oInput.iDate.H, oInput.iDate.m, oInput.iDate.s, oInput.iDate.ms);
+			dDate = this._getDate(new oInput.iDate.t(oInput.iDate.y, oInput.iDate.M, oInput.iDate.d, oInput.iDate.H, oInput.iDate.m, oInput.iDate.s, oInput.iDate.ms));
 		else if(sType === "START")
-			dDate = new Date(oInput.iDate.y, oInput.iDate.M, oInput.iDate.d, 0, 0, 0, 0);
+			dDate = this._getDate(new oInput.iDate.t(oInput.iDate.y, oInput.iDate.M, oInput.iDate.d, 0, 0, 0, 0));
 		else if(sType === "END")
-			dDate = new Date(oInput.iDate.y, oInput.iDate.M, oInput.iDate.d, 23, 59, 59, 999);
+			dDate = this._getDate(new oInput.iDate.t(oInput.iDate.y, oInput.iDate.M, oInput.iDate.d, 23, 59, 59, 999));
 	
 		return dDate;
 	},
@@ -5339,7 +5366,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 	_getCurrentDate: function()
 	{
 		var apo = this;
-		var dToday = apo.getDateByAddingOutputTZOffset(apo.convertToUTC(new Date()), apo.setting.tzOffset);
+		var dToday = apo.getDateByAddingOutputTZOffset(apo.convertToUTC(this._getDate(new Date())), apo.setting.tzOffset);
 		return dToday;
 	},
 
@@ -5347,7 +5374,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 	convertToUTC: function(dIpDate, sIpTZOffset)
 	{
 		var apo = this;
-		return new Date(dIpDate.getTime() - ((sIpTZOffset === undefined || sIpTZOffset === "" || sIpTZOffset === null) ?  -(dIpDate.getTimezoneOffset() * $.AnyPicker.extra.iMS.m) : apo._getTZOffsetInMS(sIpTZOffset)));
+		return this._getDate(new Date(dIpDate.getTime() - ((sIpTZOffset === undefined || sIpTZOffset === "" || sIpTZOffset === null) ?  -(dIpDate.getTimezoneOffset() * $.AnyPicker.extra.iMS.m) : apo._getTZOffsetInMS(sIpTZOffset))));
 	},
 
 	_getTZOffsetInMS: function(sTZOffset)
@@ -5369,7 +5396,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 	getDateByAddingOutputTZOffset: function(dIpDate, sOpTZOffset)
 	{
 		var apo = this;
-		return new Date(dIpDate.getTime() + apo._getTZOffsetInMS(sOpTZOffset));
+		return this._getDate(new Date(dIpDate.getTime() + apo._getTZOffsetInMS(sOpTZOffset)));
 	},
 
 	// Public Method
@@ -5382,12 +5409,7 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 	_getNumberOfDaysOfMonth: function(iMonth, iYear)
 	{
 		var apo = this;
-		var iArrMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
-		iArrLeapYearMonthDays = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-		if(iYear % 4 === 0)
-			return iArrLeapYearMonthDays[iMonth];
-		else
-			return iArrMonthDays[iMonth];
+		return apo.setting.calendar.prototype.getDaysInMonth(iMonth, iYear);
 	},
 
 	_normalizeDateTime: function(dInputDate, sFunction, sUnit)
@@ -5404,7 +5426,8 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 			y: dInputDate.getFullYear(),
 			H: dInputDate.getHours(),
 			m: dInputDate.getMinutes(),
-			s: dInputDate.getSeconds()
+			s: dInputDate.getSeconds(),
+			t: dInputDate.constructor
 		};
 	
 		switch(sUnit)
@@ -5412,35 +5435,35 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 			case "s":
 				{
 					if(sFunction === "START")
-						dOutputDate = new Date(iArrInput.y, iArrInput.M, iArrInput.d, iArrInput.H, iArrInput.m, 0, 0);
+						dOutputDate = this._getDate(new iArrInput.t(iArrInput.y, iArrInput.M, iArrInput.d, iArrInput.H, iArrInput.m, 0, 0));
 					else if(sFunction === "END")
-						dOutputDate = new Date(iArrInput.y, iArrInput.M, iArrInput.d, iArrInput.H, iArrInput.m, 59, 999);
+						dOutputDate = this._getDate(new iArrInput.t(iArrInput.y, iArrInput.M, iArrInput.d, iArrInput.H, iArrInput.m, 59, 999));
 				}
 				break;
 			case "m":
 				{
 					if(sFunction === "START")
-						dOutputDate = new Date(iArrInput.y, iArrInput.M, iArrInput.d, iArrInput.H, 0, 0, 0);
+						dOutputDate = this._getDate(new iArrInput.t(iArrInput.y, iArrInput.M, iArrInput.d, iArrInput.H, 0, 0, 0));
 					else if(sFunction === "END")
-						dOutputDate = new Date(iArrInput.y, iArrInput.M, iArrInput.d, iArrInput.H, 59, 59, 999);
+						dOutputDate = this._getDate(new iArrInput.t(iArrInput.y, iArrInput.M, iArrInput.d, iArrInput.H, 59, 59, 999));
 				}
 				break;
 			case "h":
 			case "T":
 				{
 					if(sFunction === "START")
-						dOutputDate = new Date(iArrInput.y, iArrInput.M, iArrInput.d, 0, 0, 0, 0);
+						dOutputDate = this._getDate(new iArrInput.t(iArrInput.y, iArrInput.M, iArrInput.d, 0, 0, 0, 0));
 					else if(sFunction === "END")
-						dOutputDate = new Date(iArrInput.y, iArrInput.M, iArrInput.d, 23, 59, 59, 999);
+						dOutputDate = this._getDate(new iArrInput.t(iArrInput.y, iArrInput.M, iArrInput.d, 23, 59, 59, 999));
 				}
 				break;
 			case "d":
 			case "dE":
 				{
 					if(sFunction === "START")
-						dOutputDate = new Date(iArrInput.y, iArrInput.M, 1, 0, 0, 0, 0);
+						dOutputDate = this._getDate(new iArrInput.t(iArrInput.y, iArrInput.M, 1, 0, 0, 0, 0));
 					else if(sFunction === "END")
-						dOutputDate = new Date(iArrInput.y, iArrInput.M, apo._getNumberOfDaysOfMonth(iArrInput.M, iArrInput.y), 0, 0, 0, 0);
+						dOutputDate = this._getDate(new iArrInput.t(iArrInput.y, iArrInput.M, apo._getNumberOfDaysOfMonth(iArrInput.M, iArrInput.y), 0, 0, 0, 0));
 				}
 				break;
 			case "M":
@@ -5449,9 +5472,9 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 			case "yE":
 				{
 					if(sFunction === "START")
-						dOutputDate = new Date(iArrInput.y, 0, 1, 0, 0, 0, 0);
+						dOutputDate = this._getDate(new iArrInput.t(iArrInput.y, 0, 1, 0, 0, 0, 0));
 					else if(sFunction === "END")
-						dOutputDate = new Date(iArrInput.y, 11, apo._getNumberOfDaysOfMonth(11, iArrInput.y), 0, 0, 0, 0);
+						dOutputDate = this._getDate(new iArrInput.t(iArrInput.y, 11, apo._getNumberOfDaysOfMonth(11, iArrInput.y), 0, 0, 0, 0));
 				}
 				break;
 		}
@@ -5509,8 +5532,8 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 	compareTimes: function(dDate1, dDate2)
 	{
 		var apo = this;
-		var dDateTime1 = new Date($.AnyPicker.extra.dToday),
-		dDateTime2 = new Date($.AnyPicker.extra.dToday);
+		var dDateTime1 = this._getDate($.AnyPicker.extra.dToday),
+		dDateTime2 = this._getDate($.AnyPicker.extra.dToday);
 
 		dDateTime1.setHours(dDate1.getHours());
 		dDateTime1.setMinutes(dDate1.getMinutes());
@@ -5556,7 +5579,8 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 			H: dInput.getHours(),
 			m: dInput.getMinutes(),
 			s: dInput.getSeconds(),
-			ms: dInput.getMilliseconds()
+			ms: dInput.getMilliseconds(),
+			t: dInput.constructor
 		};
 		
 		oInput.h = (oInput.H > 12) ? (oInput.H - 12) : ((oInput.H === 0) ? 12 : oInput.H);
@@ -5564,11 +5588,30 @@ AnyPicker.prototype = $.extend(AnyPicker.prototype, {
 		oInput.sm = (oInput.H < 12) ?  "a" : "p";
 		
 		return oInput;
-	}
+	},
 
 	//------------------------------- Date Manipulation Functions End -------------------------------
 
+	_getDate: function(date) {
+		var currentType = date.constructor.name;
+		var calendarType = this.setting.calendar.name;
+		if (currentType == calendarType)
+			return date;
+		else {
+			if (currentType == "Date" && calendarType == "JalaliDate") {
+				return new JalaliDate(date);
+			} else if (currentType == "JalaliDate" && calendarType == "Date") {
+				return date.getGregorianDate();
+			} else 
+				throw new Exception();
+		}
+	},
 });
+
+Date.prototype.getDaysInMonth = function(month, year) {
+    var iArrMonthDays = ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0) ? [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] : [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return iArrMonthDays[month];
+};
 
 // --------------------------------- Functions : AnyPicker.DateTime End --------------------------------------
 

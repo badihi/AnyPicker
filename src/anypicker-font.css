@@ -9,6 +9,23 @@
 	font-style: normal;
 }
 
+@font-face {
+	font-family: 'IRANSans-web';
+        src: 
+			url('fonts/IRANSansWeb_Bold.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+			url('fonts/IRANSansWeb_Bold.ttf') format('ttf');  
+		font-weight: bold;
+}
+
+@font-face {
+	font-family: 'IRANSans-web';
+ 
+	src: 
+		url('fonts/IRANSansWeb.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+		url('fonts/IRANSansWeb.ttf') format('ttf');  
+	font-weight: normal;
+}
+
 [class^="ap-icon-"], [class*=" ap-icon-"] {
 	font-family: 'anypicker-font';
 	speak: none;
