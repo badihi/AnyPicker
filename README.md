@@ -18,45 +18,19 @@ You can use AnyPicker in your
 
 ##Installations
 
-- npm
-
-  `npm install anypicker`
-
-- bower
-
-  `bower install anypicker`
-
-##CDN
-[AnyPicker is hosted on jsDelivr](https://www.jsdelivr.com/package/npm/anypicker).
-
-Files - Latest
-
-```
-<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/anypicker@latest/dist/anypicker-all.min.css" />
-<script type="text/javascript" src="//cdn.jsdelivr.net/npm/anypicker@latest/dist/anypicker.min.js"></script>
-<!-- For i18n -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/npm/anypicker@latest/dist/i18n/anypicker-i18n.js"></script>
-```
-
-Files - Particular Version
-
-```
-<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/anypicker@<version>/dist/anypicker-all.min.css" />
-<script type="text/javascript" src="//cdn.jsdelivr.net/npm/anypicker@<version>/dist/anypicker.min.js"></script>
-<!-- For i18n -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/npm/anypicker@<version>/dist/i18n/anypicker-i18n.js"></script>
-```
+View Anypicker-DateTime-Persian.htm in demo to see how to use it with Persian Calendar.
 
 ## Authors
 [Neha Kadam](https://github.com/nehakadam): Developer<br/> 
-[Lajpat Shah](https://github.com/lajpatshah): Concept & Design Contributor
+[Lajpat Shah](https://github.com/lajpatshah): Concept & Design Contributor<br>
+[Ahmadreza Badihi](https://github.com/badihi): Persian date support
 
 ## Thank You
 - [All Contributors](https://github.com/nehakadam/DateTimePicker/contributors)
 
 <br/> <br/> 
 
-Copyright 2017 [Lajpat Shah](https://github.com/lajpatshah)
+Copyright 2018 [Lajpat Shah](https://github.com/lajpatshah)
 
 ##License
 
