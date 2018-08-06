@@ -1,4 +1,4 @@
-## AnyPicker - Picker Library for Mobile OS 
+## AnyPicker - Picker Library for Mobile OS - With Persian (Jalali) Calendar Support
 
 
 ## What is AnyPicker?
